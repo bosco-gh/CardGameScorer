@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2 class="mb-3">Scores for {{ game['name'] }} ({{ game['game_type_name'] }})</h2>
+{% if game_over %}
+<div class="alert alert-success"><strong>Game Over!</strong> Winner: <span class="badge bg-success">{{ winner['name'] }}</span><br>
+Total Time: {% if game['total_duration_seconds'] %}{{ (game['total_duration_seconds']//60)|int }}m {{ (game['total_duration_seconds']%60)|int }}s{% else %}N/A{% endif %}
+</div>
+{% endif %}
+<div style="font-size:12px; color:#888;">
+Players: {% for player in players %}{{ player['id'] }} {% endfor %}<br>
+Rounds:<br>
+{% for entry in round_scores %}
+  Round {{ entry.round['round_number'] }} Scores: {% for s in entry.scores %}{{ s['player_id'] }}:{{ s['score'] }} {% endfor %}<br>
+  entry.scores: {{ entry.scores }}<br>
+{% endfor %}
+</div>
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Round</th>
+            <th>Joker</th>
+            <th>Time</th>
+            {% for player in players %}
+            <th>{{ player['name'] }}{% if player['eliminated'] %} <span class="badge bg-danger">Eliminated</span>{% endif %}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in round_scores %}
+        <tr>
+            <td>{{ entry.round['round_number'] }}</td>
+            <td>{{ entry.round['joker'] }}</td>
+            <td>{% if entry.round['duration_seconds'] is not none %}{{ (entry.round['duration_seconds']//60)|int }}m {{ (entry.round['duration_seconds']%60)|int }}s{% else %}-{% endif %}</td>
+            {% for player in players %}
+                <td>{{ entry.scores|get_score_for_player(player['id']) }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr class="table-info">
+        <th colspan="3">Total Score</th>
+        {% for player in players %}
+            <th>{{ round_scores|total_score_for_player(player['id']) }}</th>
+        {% endfor %}
+    </tr>
+    </tfoot>
+</table>
+{% if not game_over %}
+<a href="{{ url_for('add_round', game_id=game['id']) }}" class="btn btn-primary">Add Next Round</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2 class="mb-3">Add Game</h2>
+<form method="post" class="card p-3 shadow-sm" style="max-width:400px;">
+    <div class="mb-3">
+        <label for="name" class="form-label">Game Name:</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label for="game_type_id" class="form-label">Game Type:</label>
+        <select name="game_type_id" id="game_type_id" class="form-select" required>
+            {% for gt in game_types %}
+            <option value="{{ gt['id'] }}">{{ gt['name'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="total_score" class="form-label">Total Score Value:</label>
+        <input type="number" name="total_score" id="total_score" class="form-control" min="0">
+    </div>
+    <div class="mb-3">
+        <label for="max_score" class="form-label">Max Score Value:</label>
+        <input type="number" name="max_score" id="max_score" class="form-control" min="0">
+    </div>
+    <button type="submit" class="btn btn-success">Add</button>
+</form>
+{% endblock %}

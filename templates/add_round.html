@@ -1,0 +1,126 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2 class="mb-3">Add Round & Scores</h2>
+<form method="post" class="card p-3 shadow-sm" style="max-width:900px;">
+    <div class="mb-3">
+        <label for="game_id" class="form-label">Game:</label>
+        <select name="game_id" id="game_id" class="form-select" required {% if game_id %}readonly disabled{% endif %}>
+            {% for game in games %}
+            <option value="{{ game['id'] }}" {% if game_id and game['id'] == game_id %}selected{% endif %}>{{ game['name'] }} ({{ game['game_type_name'] }}, {{ game['played_at'][:10] }})</option>
+            {% endfor %}
+        </select>
+        {% if game_id %}<input type="hidden" name="game_id" value="{{ game_id }}">{% endif %}
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="round_number" class="form-label">Round Number:</label>
+            <input type="number" name="round_number" id="round_number" class="form-control" required value="{{ round_number if round_number else '' }}" readonly>
+        </div>
+        <div class="col">
+            <label for="joker" class="form-label">Joker:</label>
+            <input type="text" name="joker" id="joker" class="form-control">
+        </div>
+        <div class="col">
+            <label class="form-label">Time Taken (min:sec):</label>
+            <div class="input-group">
+                <input type="number" name="duration_minutes" class="form-control" min="0" placeholder="Minutes">
+                <span class="input-group-text">:</span>
+                <input type="number" name="duration_seconds" class="form-control" min="0" max="59" placeholder="Seconds">
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Declare Winner:</label>
+        <select name="winner_player_id" id="winner_player_id" class="form-select">
+            <option value="">-- Select Winner --</option>
+            {% for player in players %}
+            <option value="{{ player['id'] }}" {% if winner_player_id == player['id'] %}selected{% endif %}>{{ player['name'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <h5 class="mt-3">Scores</h5>
+    <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Player</th>
+                <th>Score Type</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players %}
+            <tr>
+                <td>{{ player['name'] }}</td>
+                <td>
+                    <select name="score_type_{{ player['id'] }}" class="form-select score-type-select" data-player="{{ player['id'] }}" {% if winner_player_id == player['id'] %}disabled{% endif %}>
+                        {% for st in score_types %}
+                            {% if st['name'] == 'Custom' %}
+                                <option value="{{ st['id'] }}" data-value="" {% if not winner_player_id or winner_player_id != player['id'] %}selected{% endif %}>Custom</option>
+                            {% elif st['name'] == 'Declared' %}
+                                <option value="{{ st['id'] }}" data-value="0" {% if winner_player_id == player['id'] %}selected{% endif %}>Declared</option>
+                            {% else %}
+                                <option value="{{ st['id'] }}" data-value="{{ st['value'] }}">{{ st['name'] }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="score_{{ player['id'] }}" class="form-control score-input" min="0" {% if winner_player_id == player['id'] %}value="0" readonly{% endif %}>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Round & Scores</button>
+</form>
+<script>
+// Auto-fill score value based on score type selection
+function updateScoreInputs() {
+    document.querySelectorAll('.score-type-select').forEach(function(sel) {
+        sel.addEventListener('change', function() {
+            const playerId = this.getAttribute('data-player');
+            const selected = this.options[this.selectedIndex];
+            const value = selected.getAttribute('data-value');
+            const scoreInput = document.querySelector(`input[name='score_${playerId}']`);
+            if (selected.text === 'Custom') {
+                scoreInput.value = '';
+                scoreInput.readOnly = false;
+            } else if (selected.text === 'Declared') {
+                scoreInput.value = 0;
+                scoreInput.readOnly = true;
+            } else if (value) {
+                scoreInput.value = value;
+                scoreInput.readOnly = false;
+            }
+        });
+    });
+    // Winner disables score and score type
+    const winnerSelect = document.getElementById('winner_player_id');
+    if (winnerSelect) {
+        winnerSelect.addEventListener('change', function() {
+            const winnerId = this.value;
+            document.querySelectorAll('.score-type-select').forEach(function(sel) {
+                const playerId = sel.getAttribute('data-player');
+                const scoreInput = document.querySelector(`input[name='score_${playerId}']`);
+                if (playerId === winnerId) {
+                    sel.value = Array.from(sel.options).find(o => o.text === 'Declared').value;
+                    sel.disabled = true;
+                    scoreInput.value = 0;
+                    scoreInput.readOnly = true;
+                } else {
+                    sel.disabled = false;
+                    if (sel.value === Array.from(sel.options).find(o => o.text === 'Declared').value) {
+                        sel.value = Array.from(sel.options).find(o => o.text === 'Custom').value;
+                        scoreInput.value = '';
+                        scoreInput.readOnly = false;
+                    }
+                }
+            });
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', updateScoreInputs);
+</script>
+{% endblock %}

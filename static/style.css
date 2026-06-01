@@ -1,0 +1,26 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+nav a { margin-right: 10px; }
+table { border-collapse: collapse; }
+th, td { padding: 6px 12px; }
+.flashes { list-style: none; padding: 0; }
+.flashes li.success { color: green; }
+.flashes li.danger { color: red; }
+body {
+    background: linear-gradient(135deg, #e0f7fa 0%, #f8fffe 100%);
+    min-height: 100vh;
+}
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 2px 16px rgba(0, 183, 195, 0.10), 0 1.5px 6px rgba(0,0,0,0.07);
+}
+h2 {
+    color: #2bbbad;
+    font-weight: 600;
+}
+.table thead {
+    background: #2bbbad;
+    color: #fff;
+}
+.navbar-brand {
+    letter-spacing: 1px;
+}

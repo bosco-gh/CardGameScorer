@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2 class="mb-3">Game Types & Games</h2>
+{% for gt in game_types %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <strong>{{ gt['name'] }}</strong>
+        </div>
+        <div class="card-body">
+            {% if games_by_type[gt['id']] %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr><th>Name</th><th>Total Score</th><th>Date Added</th></tr>
+                </thead>
+                <tbody>
+                {% for game in games_by_type[gt['id']] %}
+                    <tr>
+                        <td>{{ game['name'] }}</td>
+                        <td>{{ game['total_score'] }}</td>
+                        <td>{{ game['played_at'][:10] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <em>No games for this type.</em>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
